@@ -1,22 +1,21 @@
 import dotenv from "dotenv";
-import { generateRandomDimensions } from "./lib/dimensions";
-import { generateProductInfo } from "./lib/gemini";
-import { generatePrice, getRandomLocation, getRandomQuantity } from "./lib/product-utils";
+import { getRandomRealProduct, getRandomPrice } from "./lib/real-products";
+import { getRandomLocation, getRandomQuantity } from "./lib/product-utils";
 import { createInventory, disconnectDatabase } from "./lib/database";
 import { ConvenienceStoreProduct } from "./lib/types";
 
 dotenv.config();
 
 // Configuration - adjust these values as needed
-const PRODUCTS_PER_SECOND = 2; // Rate limit: change this to adjust API call frequency
-const BATCH_SIZE = 10; // Number of products per batch
+const PRODUCTS_PER_SECOND = 0.5; // Rate limit: 0.5 = one product every 2 seconds (very conservative)
+const BATCH_SIZE = 5; // Number of products per batch (smaller for slower processing)
 const TOTAL_PRODUCTS = 10000; // Total number of products to generate
 
 async function generateProducts(count: number = TOTAL_PRODUCTS, productsPerSecond: number = PRODUCTS_PER_SECOND) {
     console.log(`Starting generation of ${count} convenience store products...`);
-    console.log(`Rate limit: ${productsPerSecond} products per second to avoid API limits`);
+    console.log(`Rate limit: ${productsPerSecond} products per second for optimal database performance`);
     
-    const delayBetweenProducts = 1000 / productsPerSecond; // Delay between each API call
+    const delayBetweenProducts = 1000 / productsPerSecond; // Delay between each product generation
     const batchSize = BATCH_SIZE;
     const batches = Math.ceil(count / batchSize);
     
@@ -30,27 +29,34 @@ async function generateProducts(count: number = TOTAL_PRODUCTS, productsPerSecon
         console.log(`\nGenerating batch ${batchIndex + 1}/${batches} (${currentBatchSize} products)...`);
         
         for (let i = 0; i < currentBatchSize; i++) {
-            const dimensions = generateRandomDimensions();
-            const productInfo = await generateProductInfo(dimensions);
-            const price = generatePrice(dimensions);
+            const realProduct = getRandomRealProduct();
+            
+            // Add small random variations to dimensions for realism (±5%)
+            const variationFactor = 0.95 + Math.random() * 0.1; // 0.95 to 1.05
+            const width = Number((realProduct.width * variationFactor).toFixed(1));
+            const height = Number((realProduct.height * variationFactor).toFixed(1));
+            const depth = Number((realProduct.depth * variationFactor).toFixed(1));
+            const weight = Number((realProduct.weight * variationFactor).toFixed(0));
+            
+            const price = getRandomPrice(realProduct.priceRange);
             const quantity = getRandomQuantity();
             const location = getRandomLocation();
             
             products.push({
-                name: productInfo.name,
-                description: productInfo.description,
+                name: realProduct.name,
+                description: realProduct.description,
                 quantity,
                 location,
-                width: dimensions.width,
-                height: dimensions.height,
-                depth: dimensions.depth,
-                weight: dimensions.weight,
+                width,
+                height,
+                depth,
+                weight,
                 price
             });
             
             totalGenerated++;
             
-            // Rate limiting: wait 500ms between each API call
+            // Rate limiting: gentle delay for database performance
             if (i < currentBatchSize - 1) {
                 await new Promise(resolve => setTimeout(resolve, delayBetweenProducts));
             }
@@ -58,8 +64,27 @@ async function generateProducts(count: number = TOTAL_PRODUCTS, productsPerSecon
             // Progress update every 5 products
             if (totalGenerated % 5 === 0) {
                 const elapsed = Date.now() - startTime;
-                const rate = (totalGenerated / elapsed * 1000 * 60).toFixed(1); // products per minute
-                console.log(`  Generated ${totalGenerated}/${count} products (${rate} products/min)`);
+                const currentRate = totalGenerated / elapsed * 1000; // products per second
+                const remaining = count - totalGenerated;
+                const etaMs = remaining / currentRate * 1000;
+                const etaMinutes = Math.floor(etaMs / 60000);
+                const etaSeconds = Math.floor((etaMs % 60000) / 1000);
+                const etaHours = Math.floor(etaMinutes / 60);
+                const etaMinutesRemainder = etaMinutes % 60;
+                
+                let etaDisplay;
+                if (etaHours > 0) {
+                    etaDisplay = `${etaHours}h ${etaMinutesRemainder}m`;
+                } else if (etaMinutes > 0) {
+                    etaDisplay = `${etaMinutes}m ${etaSeconds}s`;
+                } else {
+                    etaDisplay = `${etaSeconds}s`;
+                }
+                
+                const ratePerMin = (currentRate * 60).toFixed(1);
+                const progressPercent = (totalGenerated / count * 100).toFixed(1);
+                
+                console.log(`  📊 ${totalGenerated}/${count} products (${progressPercent}%) | 🚀 ${ratePerMin}/min | ⏱️ ETA: ${etaDisplay}`);
             }
         }
         

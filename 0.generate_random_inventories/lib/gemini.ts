@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ProductDimensions } from "./types";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 export async function generateProductInfo(dimensions: ProductDimensions): Promise<{name: string, description: string}> {
     const prompt = `Generate a realistic convenience store product name and description based on these dimensions:
