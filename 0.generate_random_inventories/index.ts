@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { getRandomRealProduct, getRandomPrice } from "./lib/real-products";
 import { getRandomLocation, getRandomQuantity } from "./lib/product-utils";
-import { createInventory, disconnectDatabase } from "./lib/database";
+import { createManyInventories, disconnectDatabase } from "./lib/database";
 import { ConvenienceStoreProduct } from "./lib/types";
 
 dotenv.config();
@@ -90,10 +90,8 @@ async function generateProducts(count: number = TOTAL_PRODUCTS, productsPerSecon
         
         console.log(`Saving batch ${batchIndex + 1} to database...`);
         
-        // Save products to database
-        for (const product of products) {
-            await createInventory(product);
-        }
+        // Save products to database using batch insert
+        await createManyInventories(products);
         
         console.log(`✅ Batch ${batchIndex + 1} saved successfully`);
         
