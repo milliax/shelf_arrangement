@@ -101,7 +101,7 @@ def install_cuopt():
 def run_test():
     """Run a simple test to verify cuOpt works"""
     try:
-        import cuopt
+        import cuopt.routing
         import cudf
         import numpy as np
         
@@ -113,24 +113,23 @@ def run_test():
             'y': [0.0, 1.0, 0.0]
         })
         
-        distance_matrix = cudf.DataFrame([
-            [0.0, 1.41, 2.0],
-            [1.41, 0.0, 1.0],
-            [2.0, 1.0, 0.0]
-        ])
+        distance_matrix = cudf.DataFrame({
+            '0': [0.0, 1.41, 2.0],
+            '1': [1.41, 0.0, 1.0],
+            '2': [2.0, 1.0, 0.0]
+        })
         
-        data_model = cuopt.DataModel(3, 1)
+        data_model = cuopt.routing.DataModel(3, 1)
         data_model.add_cost_matrix(distance_matrix)
-        data_model.set_start_locations([0])
-        data_model.set_end_locations([0])
+        data_model.set_vehicle_locations(cudf.Series([0]), cudf.Series([0]))
         
-        solution = cuopt.solve(data_model)
+        solution = cuopt.routing.Solve(data_model)
         
         if solution.get_status() == 0:
             print("✓ cuOpt test passed successfully!")
-            route = solution.get_route(0)
-            print(f"  Test route: {route.tolist()}")
-            print(f"  Cost: {solution.final_cost}")
+            routes = solution.get_route()
+            print(f"  Test route: {routes['route'].to_arrow().to_pylist()}")
+            print(f"  Total cost: {solution.get_total_objective()}")
             return True
         else:
             print(f"✗ cuOpt test failed with status: {solution.get_status()}")
