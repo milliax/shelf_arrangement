@@ -10,14 +10,14 @@ def main():
     db_manager = init_database()
     
     # Load data from database
-    print("Loading products from database...")
-    products_df = db_manager.get_products_df()
+    print("Loading inventory from database...")
+    products_df = db_manager.get_inventory_df()
     
     if products_df.empty:
-        print("No products found in database!")
+        print("No inventory items found in database!")
         return
     
-    print(f"Loaded {len(products_df)} products")
+    print(f"Loaded {len(products_df)} inventory items")
     
     print("Loading shelf dimensions from database...")
     shelf_dimensions = db_manager.get_shelves_dimensions()

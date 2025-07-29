@@ -1,79 +1,79 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
 Base = declarative_base()
 
-class Product(Base):
-    __tablename__ = 'products'
+class Inventory(Base):
+    __tablename__ = 'Inventory'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    product_id = Column(String(50), unique=True, nullable=False)
     name = Column(String(255), nullable=False)
-    category = Column(String(100), nullable=False)
-    width = Column(Float, nullable=False)  # cm
-    depth = Column(Float, nullable=False)  # cm
-    height = Column(Float, nullable=False)  # cm
-    margin = Column(Float, nullable=False)  # profit margin (0-1)
-    sales_frequency = Column(Float, nullable=False)  # sales frequency (0-1)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    description = Column(String, nullable=False)
+    quantity = Column(Integer, nullable=False)
+    width = Column(Float, nullable=False)
+    height = Column(Float, nullable=False)
+    depth = Column(Float, nullable=False)
+    price = Column(Float, nullable=False)
+    weight = Column(Float, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow, name='createdAt')
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, name='updatedAt')
     
     # Relationship with placements
-    placements = relationship("ProductPlacement", back_populates="product")
+    inventoryPlacements = relationship("InventoryPlacement", back_populates="inventories")
     
     def __repr__(self):
-        return f"<Product(id={self.product_id}, name='{self.name}', category='{self.category}')>"
+        return f"<Inventory(id={self.id}, name='{self.name}', description='{self.description}')>"
 
 class Shelf(Base):
     __tablename__ = 'shelves'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     shelf_id = Column(Integer, unique=True, nullable=False)
-    width = Column(Float, nullable=False)  # cm
-    height = Column(Float, nullable=False)  # cm
-    depth = Column(Float, nullable=False)  # cm
-    eye_level = Column(Integer, default=0)  # 1 if eye-level, 0 otherwise
-    position_x = Column(Float, default=0.0)  # x coordinate in store
-    position_y = Column(Float, default=0.0)  # y coordinate in store
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    width = Column(Float, nullable=False)
+    height = Column(Float, nullable=False)
+    depth = Column(Float, nullable=False)
+    eye_level = Column(Integer)
+    position_x = Column(Float)
+    position_y = Column(Float)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
     
     # Relationship with placements
-    placements = relationship("ProductPlacement", back_populates="shelf")
+    inventory_placements = relationship("InventoryPlacement", back_populates="shelves")
     
     def __repr__(self):
         return f"<Shelf(id={self.shelf_id}, dimensions={self.width}x{self.height}x{self.depth})>"
 
-class ProductPlacement(Base):
-    __tablename__ = 'product_placements'
+class InventoryPlacement(Base):
+    __tablename__ = 'InventoryPlacement'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
+    inventory_id = Column(Integer, ForeignKey('Inventory.id'), nullable=False)
     shelf_id = Column(Integer, ForeignKey('shelves.id'), nullable=False)
-    slot_id = Column(Integer, nullable=False)  # slot position on shelf
-    placement_score = Column(Float)  # optimization score
-    optimization_run_id = Column(String(100))  # to track different optimization runs
-    created_at = Column(DateTime, default=datetime.utcnow)
+    slot_id = Column(Integer, nullable=False)
+    placement_score = Column(Float)
+    optimization_run_id = Column(String(100))
+    created_at = Column(DateTime)
     
     # Relationships
-    product = relationship("Product", back_populates="placements")
-    shelf = relationship("Shelf", back_populates="placements")
+    inventories = relationship("Inventory", back_populates="inventoryPlacements")
+    shelves = relationship("Shelf", back_populates="inventory_placements")
     
     def __repr__(self):
-        return f"<ProductPlacement(product_id={self.product_id}, shelf_id={self.shelf_id}, slot={self.slot_id})>"
+        return f"<InventoryPlacement(inventory_id={self.inventory_id}, shelf_id={self.shelf_id}, slot={self.slot_id})>"
 
 class OptimizationRun(Base):
     __tablename__ = 'optimization_runs'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     run_id = Column(String(100), unique=True, nullable=False)
-    status = Column(String(50), default='pending')  # pending, running, completed, failed
+    status = Column(String(50))
     total_objective = Column(Float)
-    execution_time = Column(Float)  # seconds
-    parameters = Column(Text)  # JSON string of optimization parameters
-    created_at = Column(DateTime, default=datetime.utcnow)
+    execution_time = Column(Float)
+    parameters = Column(String)
+    created_at = Column(DateTime)
     completed_at = Column(DateTime)
     
     def __repr__(self):

@@ -49,29 +49,29 @@ class DatabaseManager:
         """Get a database session"""
         return self.SessionLocal()
     
-    def get_products_df(self) -> pd.DataFrame:
+    def get_inventory_df(self) -> pd.DataFrame:
         """
-        Get all products as pandas DataFrame for optimization
+        Get all inventory items as pandas DataFrame for optimization
         """
         with self.get_session() as session:
-            from models import Product
+            from models import Inventory
             
-            products = session.query(Product).all()
+            inventory_items = session.query(Inventory).all()
             
-            if not products:
+            if not inventory_items:
                 return pd.DataFrame()
             
             data = []
-            for product in products:
+            for item in inventory_items:
                 data.append({
-                    'product_id': product.product_id,
-                    'name': product.name,
-                    'category': product.category,
-                    'width': product.width,
-                    'depth': product.depth,
-                    'height': product.height,
-                    'margin': product.margin,
-                    'sales_frequency': product.sales_frequency
+                    'product_id': str(item.id),  # Use id as product_id since that's what we had before
+                    'name': item.name,
+                    'category': item.description,  # Use description as category for now
+                    'width': item.width,
+                    'depth': item.depth,
+                    'height': item.height,
+                    'margin': 0.25,  # Default margin since not in schema
+                    'sales_frequency': 0.5  # Default sales frequency since not in schema
                 })
             
             return pd.DataFrame(data)
@@ -108,7 +108,7 @@ class DatabaseManager:
             total_objective: Total objective value from optimization
         """
         with self.get_session() as session:
-            from models import ProductPlacement, OptimizationRun, Product, Shelf
+            from models import InventoryPlacement, OptimizationRun, Inventory, Shelf
             
             # Create optimization run record
             opt_run = OptimizationRun(
@@ -119,24 +119,24 @@ class DatabaseManager:
             session.add(opt_run)
             
             # Clear existing placements for this run (if any)
-            session.query(ProductPlacement).filter(
-                ProductPlacement.optimization_run_id == run_id
+            session.query(InventoryPlacement).filter(
+                InventoryPlacement.optimization_run_id == run_id
             ).delete()
             
             # Save new placements
             for _, row in results_df.iterrows():
-                # Get product and shelf database IDs
-                product = session.query(Product).filter(
-                    Product.product_id == row['product_id']
+                # Get inventory item and shelf database IDs
+                inventory_item = session.query(Inventory).filter(
+                    Inventory.id == int(row['product_id'])
                 ).first()
                 
                 shelf = session.query(Shelf).filter(
                     Shelf.shelf_id == row['shelf_id']
                 ).first()
                 
-                if product and shelf:
-                    placement = ProductPlacement(
-                        product_id=product.id,
+                if inventory_item and shelf:
+                    placement = InventoryPlacement(
+                        inventory_id=inventory_item.id,
                         shelf_id=shelf.id,
                         slot_id=row['slot_id'],
                         placement_score=row.get('placement_score'),
@@ -151,39 +151,19 @@ class DatabaseManager:
         Load sample data for testing
         """
         with self.get_session() as session:
-            from models import Product, Shelf
+            from models import Inventory, Shelf
             
             # Check if data already exists
-            if session.query(Product).count() > 0:
+            print("Checking for existing sample data...")
+            if session.query(Inventory).count() > 0:
                 print("Sample data already exists")
                 return
             
-            # Sample products
-            products_data = [
-                {'product_id': 'P001', 'name': 'Cereal A', 'category': 'cereal', 'width': 30, 'depth': 20, 'height': 40, 'margin': 0.3, 'sales_frequency': 0.8},
-                {'product_id': 'P002', 'name': 'Cereal B', 'category': 'cereal', 'width': 25, 'depth': 20, 'height': 35, 'margin': 0.35, 'sales_frequency': 0.7},
-                {'product_id': 'P003', 'name': 'Milk', 'category': 'dairy', 'width': 15, 'depth': 30, 'height': 25, 'margin': 0.2, 'sales_frequency': 0.9},
-                {'product_id': 'P004', 'name': 'Yogurt', 'category': 'dairy', 'width': 10, 'depth': 15, 'height': 15, 'margin': 0.25, 'sales_frequency': 0.6},
-                {'product_id': 'P005', 'name': 'Bread', 'category': 'bakery', 'width': 40, 'depth': 30, 'height': 15, 'margin': 0.15, 'sales_frequency': 0.95},
-                {'product_id': 'P006', 'name': 'Chips', 'category': 'snacks', 'width': 20, 'depth': 25, 'height': 30, 'margin': 0.4, 'sales_frequency': 0.7},
-                {'product_id': 'P007', 'name': 'Soda', 'category': 'beverages', 'width': 15, 'depth': 30, 'height': 35, 'margin': 0.5, 'sales_frequency': 0.8},
-                {'product_id': 'P008', 'name': 'Water', 'category': 'beverages', 'width': 20, 'depth': 30, 'height': 35, 'margin': 0.1, 'sales_frequency': 0.85},
-            ]
-            
-            for product_data in products_data:
-                product = Product(**product_data)
-                session.add(product)
-            
             # Sample shelves
-            shelves_data = [
-                {'shelf_id': 0, 'width': 200, 'height': 50, 'depth': 50, 'eye_level': 0, 'position_x': 0, 'position_y': 100},  # Top shelf
-                {'shelf_id': 1, 'width': 200, 'height': 50, 'depth': 50, 'eye_level': 1, 'position_x': 100, 'position_y': 100},  # Eye level
-                {'shelf_id': 2, 'width': 200, 'height': 50, 'depth': 50, 'eye_level': 0, 'position_x': 200, 'position_y': 100},  # Bottom shelf
-            ]
-            
-            for shelf_data in shelves_data:
-                shelf = Shelf(**shelf_data)
-                session.add(shelf)
+            print("Loading sample shelves...")
+
+            if session.query(Shelf).count() == 0:
+                print("No shelves found, creating sample shelves")
             
             session.commit()
             print("Sample data loaded successfully")
@@ -199,8 +179,7 @@ def get_db_manager() -> DatabaseManager:
     return db_manager
 
 def init_database():
-    """Initialize database with tables and sample data"""
+    """Initialize database connection without changing schema"""
+    print("Initializing database connection...")
     db_mgr = get_db_manager()
-    db_mgr.create_tables()
-    db_mgr.load_sample_data()
     return db_mgr
