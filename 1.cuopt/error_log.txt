@@ -1,1 +1,0 @@
-Cannot index by location index with a non-integer key

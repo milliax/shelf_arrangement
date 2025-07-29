@@ -27,11 +27,11 @@ def basic_vrp_example():
                 dy = locations.iloc[i]['y'] - locations.iloc[j]['y']
                 distance_matrix.iloc[i, j] = np.sqrt(dx**2 + dy**2)
     
-    # Create cuOpt DataModel
+    # Create cuOpt DataModel using routing module
     n_vehicles = 2
     vehicle_capacity = [100, 100]
     
-    data_model = cuopt.DataModel(n_locations, n_vehicles)
+    data_model = cuopt.routing.DataModel(n_locations, n_vehicles)
     
     # Set cost matrix (distance matrix)
     data_model.add_cost_matrix(distance_matrix)
@@ -45,21 +45,23 @@ def basic_vrp_example():
     )
     
     # Set depot (start and end at location 0)
-    data_model.set_start_locations([0, 0])  # Both vehicles start at depot
-    data_model.set_end_locations([0, 0])    # Both vehicles end at depot
+    start_locations = cudf.Series([0, 0])  # Both vehicles start at depot
+    end_locations = cudf.Series([0, 0])    # Both vehicles end at depot
+    data_model.set_vehicle_locations(start_locations, end_locations)
     
-    # Create solver instance
-    routing_solution = cuopt.solve(data_model)
+    # Solve using routing module
+    routing_solution = cuopt.routing.Solve(data_model)
     
     if routing_solution.get_status() == 0:  # Solution found
         print("Solution found!")
         print(f"Best routes:")
         
-        for vehicle_id in range(n_vehicles):
-            route = routing_solution.get_route(vehicle_id)
-            print(f"Vehicle {vehicle_id}: {route.tolist()}")
-            
-        print(f"Total cost: {routing_solution.final_cost}")
+        # Get route dataframe
+        routes_df = routing_solution.get_route()
+        print("Route details:")
+        print(routes_df.to_pandas())
+        
+        print(f"Total cost: {routing_solution.get_total_objective()}")
         
         return routing_solution
     else:
@@ -96,8 +98,8 @@ def advanced_vrp_example():
                 dy = locations.iloc[i]['y'] - locations.iloc[j]['y']
                 distance_matrix.iloc[i, j] = np.sqrt(dx**2 + dy**2)
     
-    # Create data model
-    data_model = cuopt.DataModel(n_locations, n_vehicles)
+    # Create data model using routing module
+    data_model = cuopt.routing.DataModel(n_locations, n_vehicles)
     data_model.add_cost_matrix(distance_matrix)
     
     # Add capacity constraints
@@ -125,22 +127,23 @@ def advanced_vrp_example():
         distance_matrix  # travel time = distance
     )
     
-    # Set start and end locations
-    data_model.set_start_locations([0] * n_vehicles)
-    data_model.set_end_locations([0] * n_vehicles)
+    # Set start and end locations using current API
+    start_locations = cudf.Series([0] * n_vehicles)
+    end_locations = cudf.Series([0] * n_vehicles)
+    data_model.set_vehicle_locations(start_locations, end_locations)
     
-    # Solve
-    routing_solution = cuopt.solve(data_model)
+    # Solve using routing module
+    routing_solution = cuopt.routing.Solve(data_model)
     
     if routing_solution.get_status() == 0:
         print("Advanced solution found!")
         
-        total_cost = 0
-        for vehicle_id in range(n_vehicles):
-            route = routing_solution.get_route(vehicle_id)
-            print(f"Vehicle {vehicle_id}: {route.tolist()}")
+        # Get route dataframe
+        routes_df = routing_solution.get_route()
+        print("Route details:")
+        print(routes_df.to_pandas())
             
-        print(f"Total cost: {routing_solution.final_cost}")
+        print(f"Total cost: {routing_solution.get_total_objective()}")
         return routing_solution
     else:
         print(f"No solution found. Status: {routing_solution.get_status()}")
