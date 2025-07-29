@@ -163,7 +163,7 @@ class DatabaseManager:
             print("Loading sample shelves...")
 
             if session.query(Shelf).count() == 0:
-                print("No shelves found, creating sample shelves")
+                print("No shelves found")
             
             session.commit()
             print("Sample data loaded successfully")
