@@ -114,7 +114,7 @@ class GurobiSolver:
                 solution[j] = []
                 for i in range(len(self.merchandise)):
                     if self.x[i, j].X > 0.5:
-                        # print(f"Item {i} is on shelf {j}")
+                        print(f"Item {i} is on shelf {j}")
                         solution[j].append({
                             'product_id': self.merchandise.iloc[i]['product_id'],
                             'name': self.merchandise.iloc[i]['name'],

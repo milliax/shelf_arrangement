@@ -74,8 +74,7 @@ def main():
         print(solution)
 
         # save result to database
-
-        
+ 
     else:
         print("No optimal solution found.")
 
