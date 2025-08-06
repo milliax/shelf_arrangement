@@ -112,14 +112,13 @@ class DatabaseManager:
                 data.append({
                     'product_id': str(item.id),
                     'name': item.name,
-                    'category': item.description,
+                    'description': item.description,
                     'width': item.width,
                     'depth': item.depth,
                     'height': item.height,
-                    'margin': 0.25,  # Default margin since not in schema
-                    'sales_frequency': 0.5,  # Default sales frequency since not in schema
-                    # Safe access since constraints not in model
-                    'constraints': getattr(item, 'constraints', '')
+                    'weight': item.weight,
+                    'price': item.price,
+                    'quantity': item.quantity,
                 })
 
             return pd.DataFrame(data)
