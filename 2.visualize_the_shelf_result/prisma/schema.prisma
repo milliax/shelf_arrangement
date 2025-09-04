@@ -1,0 +1,63 @@
+generator client {
+    provider = "prisma-client-js"
+    output   = "../generated/prisma"
+}
+
+datasource db {
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
+}
+
+model Inventory {
+    id                 Int                  @id @default(autoincrement())
+    name               String
+    description        String
+    quantity           Int
+    width              Float
+    height             Float
+    depth              Float
+    price              Float
+    weight             Float
+    createdAt          DateTime             @default(now())
+    updatedAt          DateTime             @updatedAt
+    
+    InventoryPlacement InventoryPlacement[]
+}
+
+model InventoryPlacement {
+    id String @id @default(cuid())
+
+    inventory   Inventory @relation(fields: [inventoryId], references: [id])
+    inventoryId Int
+
+    shelf   shelves @relation(fields: [shelfId], references: [id])
+    shelfId Int
+}
+
+model optimization_runs {
+    id              Int       @id @default(autoincrement())
+    run_id          String    @unique @db.VarChar(100)
+    status          String?   @db.VarChar(50)
+    total_objective Float?
+    execution_time  Float?
+    parameters      String?
+    created_at      DateTime? @db.Timestamp(6)
+    completed_at    DateTime? @db.Timestamp(6)
+}
+
+model shelves {
+    id       Int   @id @default(autoincrement())
+    shelf_id Int   @unique
+    width    Float
+    height   Float
+    depth    Float
+    weight   Float
+
+    eye_level Boolean?
+
+    created_at DateTime? @default(now())
+    updated_at DateTime? @updatedAt
+
+    InventoryPlacement InventoryPlacement[]
+}
