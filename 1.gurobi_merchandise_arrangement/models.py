@@ -42,6 +42,8 @@ class Shelves(Base):
     updated_at = Column(DateTime, nullable=True,
                         default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # isPromoted = Column(Boolean, nullable=True, default=False)
+
     # Relationship
     placements = relationship('InventoryPlacement', back_populates='shelf')
 

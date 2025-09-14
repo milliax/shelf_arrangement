@@ -56,7 +56,6 @@ class GurobiSolver:
         # items on the shelf cannot exceed the shelf's dimensions
 
         for j in range(num_shelves):
-
             # gap is considered in the shelf configuration that every items in between consists a gap
             # self.model.addConstr(
             #     sum(self.merchandise.iloc[i]['width'] * self.x[i, j]
@@ -87,7 +86,24 @@ class GurobiSolver:
                 name=f"shelf_{j}_max_depth"
             )
 
-        # Objective function: maximize the number of displayed items
+        # Set up constraints for eye-level display
+
+        """ Objective functions """
+
+        # make sure promoted items are displayed on eye-level shelves if possible, and must be displayed
+
+        for i in range(num_items):
+            if self.merchandise.iloc[i]['isPromoted']:
+                self.model.addConstr(
+                    sum(self.x[i, j] for j in range(num_shelves) if shelves[j].eye_level) >= self.y[i],
+                    name=f"promoted_item_{i}_eye_level"
+                )
+                self.model.addConstr(
+                    self.y[i] == 1,
+                    name=f"promoted_item_{i}_must_display"
+                )
+
+        # maximize the number of displayed items
         self.model.setObjective(
             sum(self.y[i] for i in range(num_items)), GRB.MAXIMIZE)
 

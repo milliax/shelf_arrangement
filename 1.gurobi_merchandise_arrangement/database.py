@@ -119,6 +119,8 @@ class DatabaseManager:
                     'weight': item.weight,
                     'price': item.price,
                     'quantity': item.quantity,
+
+                    'isPromoted': item.isPromoted if hasattr(item, 'isPromoted') else False,
                 })
 
             return pd.DataFrame(data)

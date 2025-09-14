@@ -10,6 +10,9 @@ class ShelfConfiguration:
     weight: float
     gap: float = field(default=0.25)
 
+    eye_level: bool = field(default=False)
+
     def __repr__(self):
         return (f"ShelfConfiguration(width={self.width}, height={self.height}, "
-                f"depth={self.depth}, max_weight={self.weight}, gap={self.gap})")
+                f"depth={self.depth}, max_weight={self.weight}, gap={self.gap}, "
+                f"eye_level={self.eye_level})")

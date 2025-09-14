@@ -1,3 +1,4 @@
+from typing import List
 import pandas as pd
 from datetime import datetime
 import uuid
@@ -8,6 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # take environment variables
 
+
 def main():
     # Initialize database and load sample data
     print("Initializing database...")
@@ -15,10 +17,12 @@ def main():
 
     # Generate shelf dimensions
     shelf_dimensions = {
-        'width': 100,  # Example width in cm
-        'height': 200,  # Example height in cm
+        'width': 500,  # Example width in cm
+        'height': 50,  # Example height in cm
         'depth': 50,  # Example length in cm
-        'weight': 500  # Example max weight in kg
+        'weight': 5000,  # Example max weight in g
+
+        'eye_level': True,
     }
 
     print(f"Shelf dimensions: {shelf_dimensions}")
@@ -28,28 +32,46 @@ def main():
 
     print(f"Number one shelf configuration: {shelf_config}")
 
-    shelves = [shelf_config for _ in range(3)]
+    # shelves: List[ShelfConfiguration] = [ShelfConfiguration(
+    #     'shelf_id': 'x',  # Generate shelf_id starting from 1
+    #     'width': shelf_config.width,
+    #     'height': shelf_config.height,
+    #     'depth': shelf_config.depth,
+    #     'weight': shelf_config.weight,
+    #     'gap': 0.25,  # Default gap value
+    #     'eye_level': (x == 1 or x == 2),  # Not available in ShelfConfiguration
+    # ) for x in range(4)]
+    shelves: List[ShelfConfiguration] = [shelf_config for _ in range(4)]
 
-    # get minimum dimension of shelves
+    for i, shelf in enumerate(shelves):
+        if i == 0:
+            shelf.eye_level = True
+        elif i == 1:
+            shelf.eye_level = True
+        else:
+            shelf.eye_level = False
 
-    min_shelf_dimension = {
-        'width': min(shelf.width for shelf in shelves),
-        'height': min(shelf.height for shelf in shelves),
-        'depth': min(shelf.depth for shelf in shelves),
-        'weight': min(shelf.weight for shelf in shelves)
+    # get maximize shelf dimension to filter products
+
+    print(shelves)
+
+    max_shelf_dimension = {
+        "weight": max(shelf.weight for shelf in shelves),
+        "width": max(shelf.width for shelf in shelves),
+        "height": max(shelf.height for shelf in shelves),
+        "depth": max(shelf.depth for shelf in shelves)
     }
-
-    print(f"Minimum shelf dimension: {min_shelf_dimension}")
 
     # Load data from database
     print("Loading inventory from database...")
     products_df = db_manager.get_inventories_with_constraints(dimension={
-        "weight": min_shelf_dimension['weight'],
-
-        "width": min_shelf_dimension['width'],
-        "height": min_shelf_dimension['height'],
-        "depth": min_shelf_dimension['depth']
+        "weight": max_shelf_dimension['weight'],
+        "width": max_shelf_dimension['width'],
+        "height": max_shelf_dimension['height'],
+        "depth": max_shelf_dimension['depth']
     })
+
+    # print(products_df)
 
     if products_df.empty:
         print("No inventory items found in database!")
@@ -84,14 +106,15 @@ def main():
                 'weight': shelf.weight,
                 'gap': 0.25,  # Default gap value
 
-                'eye_level': False,  # Not available in ShelfConfiguration
+                'eye_level': False,
             })
-        
+
         # print(shelves_data)
         db_manager.save_shelves(shelves_data)
 
         # pylint: disable=some-error-code
-        db_manager.save_optimization_results(solution, run_id=str(uuid.uuid4()), total_objective=optimizer.model.ObjVal) # type: ignore
+        db_manager.save_optimization_results(solution, run_id=str(  # type: ignore
+            uuid.uuid4()), total_objective=optimizer.model.ObjVal)
 
     else:
         print("No optimal solution found.")
