@@ -10,27 +10,31 @@ datasource db {
 }
 
 model Inventory {
-  id                 Int                  @id @default(autoincrement())
-  name               String
-  description        String
-  quantity           Int
-  width              Float
-  height             Float
-  depth              Float
-  price              Float
-  weight             Float
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  quantity    Int
+  width       Float
+  height      Float
+  depth       Float
+  price       Float
+  weight      Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  isPromoted Boolean @default(false)
+  salesRate  Float? // percentage of items sold in a given time frame (e.g., last month)
+
   InventoryPlacement InventoryPlacement[]
 }
 
 model InventoryPlacement {
   id String @id @default(cuid())
 
-  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
   inventoryId Int
 
-  shelf   shelves @relation(fields: [shelfId], references: [id])
+  shelf   shelves @relation(fields: [shelfId], references: [id], onDelete: Cascade)
   shelfId Int
 }
 

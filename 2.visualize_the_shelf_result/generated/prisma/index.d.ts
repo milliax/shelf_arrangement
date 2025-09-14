@@ -249,8 +249,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.15.0
-   * Query Engine version: 85179d7826409ee107a6ba334b5e305ae3fba9fb
+   * Prisma Client JS version: 6.16.1
+   * Query Engine version: 1c57fdcd7e44b29b9313256c76699e91c3ac3c43
    */
   export type PrismaVersion = {
     client: string
@@ -1029,6 +1029,10 @@ export namespace Prisma {
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
     /**
+     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
+     */
+    adapter?: runtime.SqlDriverAdapterFactory | null
+    /**
      * Global configuration for omitting model fields by default.
      * 
      * @example
@@ -1210,6 +1214,7 @@ export namespace Prisma {
     depth: number | null
     price: number | null
     weight: number | null
+    salesRate: number | null
   }
 
   export type InventorySumAggregateOutputType = {
@@ -1220,6 +1225,7 @@ export namespace Prisma {
     depth: number | null
     price: number | null
     weight: number | null
+    salesRate: number | null
   }
 
   export type InventoryMinAggregateOutputType = {
@@ -1234,6 +1240,8 @@ export namespace Prisma {
     weight: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    isPromoted: boolean | null
+    salesRate: number | null
   }
 
   export type InventoryMaxAggregateOutputType = {
@@ -1248,6 +1256,8 @@ export namespace Prisma {
     weight: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    isPromoted: boolean | null
+    salesRate: number | null
   }
 
   export type InventoryCountAggregateOutputType = {
@@ -1262,6 +1272,8 @@ export namespace Prisma {
     weight: number
     createdAt: number
     updatedAt: number
+    isPromoted: number
+    salesRate: number
     _all: number
   }
 
@@ -1274,6 +1286,7 @@ export namespace Prisma {
     depth?: true
     price?: true
     weight?: true
+    salesRate?: true
   }
 
   export type InventorySumAggregateInputType = {
@@ -1284,6 +1297,7 @@ export namespace Prisma {
     depth?: true
     price?: true
     weight?: true
+    salesRate?: true
   }
 
   export type InventoryMinAggregateInputType = {
@@ -1298,6 +1312,8 @@ export namespace Prisma {
     weight?: true
     createdAt?: true
     updatedAt?: true
+    isPromoted?: true
+    salesRate?: true
   }
 
   export type InventoryMaxAggregateInputType = {
@@ -1312,6 +1328,8 @@ export namespace Prisma {
     weight?: true
     createdAt?: true
     updatedAt?: true
+    isPromoted?: true
+    salesRate?: true
   }
 
   export type InventoryCountAggregateInputType = {
@@ -1326,6 +1344,8 @@ export namespace Prisma {
     weight?: true
     createdAt?: true
     updatedAt?: true
+    isPromoted?: true
+    salesRate?: true
     _all?: true
   }
 
@@ -1427,6 +1447,8 @@ export namespace Prisma {
     weight: number
     createdAt: Date
     updatedAt: Date
+    isPromoted: boolean
+    salesRate: number | null
     _count: InventoryCountAggregateOutputType | null
     _avg: InventoryAvgAggregateOutputType | null
     _sum: InventorySumAggregateOutputType | null
@@ -1460,6 +1482,8 @@ export namespace Prisma {
     weight?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    isPromoted?: boolean
+    salesRate?: boolean
     InventoryPlacement?: boolean | Inventory$InventoryPlacementArgs<ExtArgs>
     _count?: boolean | InventoryCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventory"]>
@@ -1476,6 +1500,8 @@ export namespace Prisma {
     weight?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    isPromoted?: boolean
+    salesRate?: boolean
   }, ExtArgs["result"]["inventory"]>
 
   export type InventorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1490,6 +1516,8 @@ export namespace Prisma {
     weight?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    isPromoted?: boolean
+    salesRate?: boolean
   }, ExtArgs["result"]["inventory"]>
 
   export type InventorySelectScalar = {
@@ -1504,9 +1532,11 @@ export namespace Prisma {
     weight?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    isPromoted?: boolean
+    salesRate?: boolean
   }
 
-  export type InventoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "quantity" | "width" | "height" | "depth" | "price" | "weight" | "createdAt" | "updatedAt", ExtArgs["result"]["inventory"]>
+  export type InventoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "quantity" | "width" | "height" | "depth" | "price" | "weight" | "createdAt" | "updatedAt" | "isPromoted" | "salesRate", ExtArgs["result"]["inventory"]>
   export type InventoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     InventoryPlacement?: boolean | Inventory$InventoryPlacementArgs<ExtArgs>
     _count?: boolean | InventoryCountOutputTypeDefaultArgs<ExtArgs>
@@ -1531,6 +1561,8 @@ export namespace Prisma {
       weight: number
       createdAt: Date
       updatedAt: Date
+      isPromoted: boolean
+      salesRate: number | null
     }, ExtArgs["result"]["inventory"]>
     composites: {}
   }
@@ -1966,6 +1998,8 @@ export namespace Prisma {
     readonly weight: FieldRef<"Inventory", 'Float'>
     readonly createdAt: FieldRef<"Inventory", 'DateTime'>
     readonly updatedAt: FieldRef<"Inventory", 'DateTime'>
+    readonly isPromoted: FieldRef<"Inventory", 'Boolean'>
+    readonly salesRate: FieldRef<"Inventory", 'Float'>
   }
     
 
@@ -5751,7 +5785,9 @@ export namespace Prisma {
     price: 'price',
     weight: 'weight',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    isPromoted: 'isPromoted',
+    salesRate: 'salesRate'
   };
 
   export type InventoryScalarFieldEnum = (typeof InventoryScalarFieldEnum)[keyof typeof InventoryScalarFieldEnum]
@@ -5905,6 +5941,8 @@ export namespace Prisma {
     weight?: FloatFilter<"Inventory"> | number
     createdAt?: DateTimeFilter<"Inventory"> | Date | string
     updatedAt?: DateTimeFilter<"Inventory"> | Date | string
+    isPromoted?: BoolFilter<"Inventory"> | boolean
+    salesRate?: FloatNullableFilter<"Inventory"> | number | null
     InventoryPlacement?: InventoryPlacementListRelationFilter
   }
 
@@ -5920,6 +5958,8 @@ export namespace Prisma {
     weight?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    isPromoted?: SortOrder
+    salesRate?: SortOrderInput | SortOrder
     InventoryPlacement?: InventoryPlacementOrderByRelationAggregateInput
   }
 
@@ -5938,6 +5978,8 @@ export namespace Prisma {
     weight?: FloatFilter<"Inventory"> | number
     createdAt?: DateTimeFilter<"Inventory"> | Date | string
     updatedAt?: DateTimeFilter<"Inventory"> | Date | string
+    isPromoted?: BoolFilter<"Inventory"> | boolean
+    salesRate?: FloatNullableFilter<"Inventory"> | number | null
     InventoryPlacement?: InventoryPlacementListRelationFilter
   }, "id">
 
@@ -5953,6 +5995,8 @@ export namespace Prisma {
     weight?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    isPromoted?: SortOrder
+    salesRate?: SortOrderInput | SortOrder
     _count?: InventoryCountOrderByAggregateInput
     _avg?: InventoryAvgOrderByAggregateInput
     _max?: InventoryMaxOrderByAggregateInput
@@ -5975,6 +6019,8 @@ export namespace Prisma {
     weight?: FloatWithAggregatesFilter<"Inventory"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Inventory"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Inventory"> | Date | string
+    isPromoted?: BoolWithAggregatesFilter<"Inventory"> | boolean
+    salesRate?: FloatNullableWithAggregatesFilter<"Inventory"> | number | null
   }
 
   export type InventoryPlacementWhereInput = {
@@ -6184,6 +6230,8 @@ export namespace Prisma {
     weight: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    isPromoted?: boolean
+    salesRate?: number | null
     InventoryPlacement?: InventoryPlacementCreateNestedManyWithoutInventoryInput
   }
 
@@ -6199,6 +6247,8 @@ export namespace Prisma {
     weight: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    isPromoted?: boolean
+    salesRate?: number | null
     InventoryPlacement?: InventoryPlacementUncheckedCreateNestedManyWithoutInventoryInput
   }
 
@@ -6213,6 +6263,8 @@ export namespace Prisma {
     weight?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isPromoted?: BoolFieldUpdateOperationsInput | boolean
+    salesRate?: NullableFloatFieldUpdateOperationsInput | number | null
     InventoryPlacement?: InventoryPlacementUpdateManyWithoutInventoryNestedInput
   }
 
@@ -6228,6 +6280,8 @@ export namespace Prisma {
     weight?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isPromoted?: BoolFieldUpdateOperationsInput | boolean
+    salesRate?: NullableFloatFieldUpdateOperationsInput | number | null
     InventoryPlacement?: InventoryPlacementUncheckedUpdateManyWithoutInventoryNestedInput
   }
 
@@ -6243,6 +6297,8 @@ export namespace Prisma {
     weight: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    isPromoted?: boolean
+    salesRate?: number | null
   }
 
   export type InventoryUpdateManyMutationInput = {
@@ -6256,6 +6312,8 @@ export namespace Prisma {
     weight?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isPromoted?: BoolFieldUpdateOperationsInput | boolean
+    salesRate?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type InventoryUncheckedUpdateManyInput = {
@@ -6270,6 +6328,8 @@ export namespace Prisma {
     weight?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isPromoted?: BoolFieldUpdateOperationsInput | boolean
+    salesRate?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type InventoryPlacementCreateInput = {
@@ -6519,10 +6579,31 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type InventoryPlacementListRelationFilter = {
     every?: InventoryPlacementWhereInput
     some?: InventoryPlacementWhereInput
     none?: InventoryPlacementWhereInput
+  }
+
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
   }
 
   export type InventoryPlacementOrderByRelationAggregateInput = {
@@ -6541,6 +6622,8 @@ export namespace Prisma {
     weight?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    isPromoted?: SortOrder
+    salesRate?: SortOrder
   }
 
   export type InventoryAvgOrderByAggregateInput = {
@@ -6551,6 +6634,7 @@ export namespace Prisma {
     depth?: SortOrder
     price?: SortOrder
     weight?: SortOrder
+    salesRate?: SortOrder
   }
 
   export type InventoryMaxOrderByAggregateInput = {
@@ -6565,6 +6649,8 @@ export namespace Prisma {
     weight?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    isPromoted?: SortOrder
+    salesRate?: SortOrder
   }
 
   export type InventoryMinOrderByAggregateInput = {
@@ -6579,6 +6665,8 @@ export namespace Prisma {
     weight?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    isPromoted?: SortOrder
+    salesRate?: SortOrder
   }
 
   export type InventorySumOrderByAggregateInput = {
@@ -6589,6 +6677,7 @@ export namespace Prisma {
     depth?: SortOrder
     price?: SortOrder
     weight?: SortOrder
+    salesRate?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -6655,6 +6744,30 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
   export type InventoryScalarRelationFilter = {
     is?: InventoryWhereInput
     isNot?: InventoryWhereInput
@@ -6708,17 +6821,6 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type FloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -6728,11 +6830,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type SortOrderInput = {
-    sort: SortOrder
-    nulls?: NullsOrder
   }
 
   export type optimization_runsCountOrderByAggregateInput = {
@@ -6796,22 +6893,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -6933,6 +7014,18 @@ export namespace Prisma {
     set?: Date | string
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type InventoryPlacementUpdateManyWithoutInventoryNestedInput = {
     create?: XOR<InventoryPlacementCreateWithoutInventoryInput, InventoryPlacementUncheckedCreateWithoutInventoryInput> | InventoryPlacementCreateWithoutInventoryInput[] | InventoryPlacementUncheckedCreateWithoutInventoryInput[]
     connectOrCreate?: InventoryPlacementCreateOrConnectWithoutInventoryInput | InventoryPlacementCreateOrConnectWithoutInventoryInput[]
@@ -6991,14 +7084,6 @@ export namespace Prisma {
 
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
-  }
-
-  export type NullableFloatFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -7098,6 +7183,22 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -7161,6 +7262,41 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedStringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -7173,17 +7309,6 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
@@ -7212,33 +7337,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -7324,6 +7422,8 @@ export namespace Prisma {
     weight: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    isPromoted?: boolean
+    salesRate?: number | null
   }
 
   export type InventoryUncheckedCreateWithoutInventoryPlacementInput = {
@@ -7338,6 +7438,8 @@ export namespace Prisma {
     weight: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    isPromoted?: boolean
+    salesRate?: number | null
   }
 
   export type InventoryCreateOrConnectWithoutInventoryPlacementInput = {
@@ -7395,6 +7497,8 @@ export namespace Prisma {
     weight?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isPromoted?: BoolFieldUpdateOperationsInput | boolean
+    salesRate?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type InventoryUncheckedUpdateWithoutInventoryPlacementInput = {
@@ -7409,6 +7513,8 @@ export namespace Prisma {
     weight?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isPromoted?: BoolFieldUpdateOperationsInput | boolean
+    salesRate?: NullableFloatFieldUpdateOperationsInput | number | null
   }
 
   export type shelvesUpsertWithoutInventoryPlacementInput = {
