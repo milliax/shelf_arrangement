@@ -23,6 +23,8 @@ class Inventory(Base):
     updatedAt = Column(DateTime, nullable=False,
                         default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    isPromoted = Column(Boolean, nullable=True, default=False)
+
     # Relationship
     placements = relationship('InventoryPlacement', back_populates='inventory')
 

@@ -235,6 +235,8 @@ class DatabaseManager:
             session.query(Shelves).delete()
             print("Deleted existing shelves")
 
+            print(shelves_data)
+
             # Save shelf configurations
             for shelf_data in shelves_data:
                 shelf = Shelves(
@@ -243,7 +245,7 @@ class DatabaseManager:
                     height=shelf_data['height'],
                     depth=shelf_data['depth'],
                     weight=shelf_data['weight'],
-                    eye_level=shelf_data.get('eye_level'),
+                    eye_level=shelf_data['eye_level'],
                 )
 
                 session.add(shelf)

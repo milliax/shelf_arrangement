@@ -20,7 +20,7 @@ def main():
         'width': 500,  # Example width in cm
         'height': 50,  # Example height in cm
         'depth': 50,  # Example length in cm
-        'weight': 5000,  # Example max weight in g
+        'weight': 10000,  # Example max weight in g
 
         'eye_level': True,
     }
@@ -41,15 +41,19 @@ def main():
     #     'gap': 0.25,  # Default gap value
     #     'eye_level': (x == 1 or x == 2),  # Not available in ShelfConfiguration
     # ) for x in range(4)]
-    shelves: List[ShelfConfiguration] = [shelf_config for _ in range(4)]
+    shelves: List[ShelfConfiguration] = []
+    # = [shelf_config for _ in range(4)]
 
-    for i, shelf in enumerate(shelves):
-        if i == 0:
-            shelf.eye_level = True
-        elif i == 1:
-            shelf.eye_level = True
-        else:
-            shelf.eye_level = False
+    for i in range(4):
+        shelves.append(ShelfConfiguration(
+            width=shelf_config.width,
+            height=shelf_config.height,
+            depth=shelf_config.depth,
+            weight=shelf_config.weight,
+            gap=shelf_config.gap,
+            eye_level=(i == 1 or i == 2),
+        ))
+        # shelves[i].isPromoted = (i == 0 or i == 1)
 
     # get maximize shelf dimension to filter products
 
@@ -92,10 +96,15 @@ def main():
     # Get and print the solution
     if result:
         solution = optimizer.get_solution()
+        print("solution")
         # print(solution)
 
         # Convert ShelfConfiguration objects to dictionaries for database storage
         shelves_data = []
+
+        print("shelfes_data:")
+        print(shelves)
+
         for i, shelf in enumerate(shelves):
 
             shelves_data.append({
@@ -106,7 +115,7 @@ def main():
                 'weight': shelf.weight,
                 'gap': 0.25,  # Default gap value
 
-                'eye_level': False,
+                'eye_level': shelf.eye_level,
             })
 
         # print(shelves_data)

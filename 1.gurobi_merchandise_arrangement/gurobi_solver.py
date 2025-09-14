@@ -1,6 +1,7 @@
 from gurobipy import Model, GRB
 from database import init_database, get_db_manager
 from models import Inventory
+import gurobipy as gp
 
 
 class GurobiSolver:
@@ -25,7 +26,6 @@ class GurobiSolver:
         num_shelves = len(shelves)
 
         # setup variables
-
         for i in range(num_items):
             self.y[i] = self.model.addVar(
                 vtype=GRB.BINARY, name=f"item_{i}_displayed")
@@ -54,15 +54,7 @@ class GurobiSolver:
             )
 
         # items on the shelf cannot exceed the shelf's dimensions
-
         for j in range(num_shelves):
-            # gap is considered in the shelf configuration that every items in between consists a gap
-            # self.model.addConstr(
-            #     sum(self.merchandise.iloc[i]['width'] * self.x[i, j]
-            #         for i in range(num_items)) + (shelves[j].gap * (num_items - 1)) <= shelves[j].width,
-            #     name=f"shelf_{j}_max_width"
-            # )
-
             self.model.addConstr(
                 sum(self.merchandise.iloc[i]['width'] * self.x[i, j] for i in range(num_items)) +
                 shelves[j].gap * (sum(self.x[i, j]
@@ -70,16 +62,14 @@ class GurobiSolver:
                 name=f"shelf_{j}_max_width"
             )
 
+            self.model.addConstrs((self.merchandise.iloc[i]['height'] * self.x[i, j] <= self.shelves[j].height for i in range(
+                num_items) for j in range(num_shelves)), name="shelf_height_limit_{}".format(j))
             # self.model.addConstr(
-            #     sum(self.merchandise.iloc[i]['width'] * self.x[i, j]
-            #         for i in range(num_items)) <= shelves[j]['width'],
-            #     name=f"shelf_{j}_max_width"
+            #     gp.max_(self.merchandise.iloc[i]['height'] * self.x[i, j]
+            #         for i in range(num_items)) < shelves[j].height,
+            #     name=f"shelf_{j}_max_height"
             # )
-            self.model.addConstr(
-                sum(self.merchandise.iloc[i]['height'] * self.x[i, j]
-                    for i in range(num_items)) <= shelves[j].height,
-                name=f"shelf_{j}_max_height"
-            )
+
             self.model.addConstr(
                 sum(self.merchandise.iloc
                     [i]['depth'] * self.x[i, j] for i in range(num_items)) <= shelves[j].depth,
@@ -87,26 +77,39 @@ class GurobiSolver:
             )
 
         # Set up constraints for eye-level display
-
-        """ Objective functions """
-
         # make sure promoted items are displayed on eye-level shelves if possible, and must be displayed
+        # if the item is promoted and there are still space on the shelf, it must be displayed
 
+        # for i in range(num_items):
+
+        #     # print(self.merchandise.iloc[i])
+
+        #     if self.merchandise.iloc[i]['isPromoted']:
+        #         # print(f"Item {i} is promoted")
+        #         self.model.addConstr(
+        #             self.y[i] == 1,
+        #             name=f"promoted_item_{i}_must_display"
+        #         )
         for i in range(num_items):
             if self.merchandise.iloc[i]['isPromoted']:
-                self.model.addConstr(
-                    sum(self.x[i, j] for j in range(num_shelves) if shelves[j].eye_level) >= self.y[i],
-                    name=f"promoted_item_{i}_eye_level"
-                )
+                # the more promoted items in eye-level shelf the better
+                # self.model.addConstr(
+                #     sum(self.x[i, j] for j in range(num_shelves) if shelves[j].eye_level) >= self.y[i],
+                #     name=f"promoted_item_{i}_eye_level"
+                # )
+
                 self.model.addConstr(
                     self.y[i] == 1,
                     name=f"promoted_item_{i}_must_display"
                 )
 
+        """ Objective functions """
+
         # maximize the number of displayed items
         self.model.setObjective(
-            sum(self.y[i] for i in range(num_items)), GRB.MAXIMIZE)
-
+            sum(self.y[i] for i in range(num_items))
+            + sum(10000 for i in range(num_items)
+                  for j in range(num_shelves) if shelves[j].eye_level and self.merchandise.iloc[i]['isPromoted']), GRB.MAXIMIZE)
         pass
 
     def optimize(self):
@@ -130,7 +133,7 @@ class GurobiSolver:
                 solution[j] = []
                 for i in range(len(self.merchandise)):
                     if self.x[i, j].X > 0.5:
-                        print(f"Item {i} is on shelf {j}")
+                        # print(f"Item {i} is on shelf {j}")
                         solution[j].append({
                             'product_id': self.merchandise.iloc[i]['product_id'],
                             'name': self.merchandise.iloc[i]['name'],

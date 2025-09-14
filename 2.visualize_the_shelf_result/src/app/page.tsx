@@ -59,7 +59,10 @@ const ShelfCard = ({ shelf }: { shelf: any }) => {
 
     return (
         <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Shelf ID: {shelf.id}</h2>
+            <h2 className="text-2xl font-bold mb-4 gap-1">
+                <span className='font-bold text-2xl'>Shelf ID: {shelf.id}</span>
+                <span className='font-base text-base'> dimensions: {shelf.width} x {shelf.height} x {shelf.depth}, eye-level: {shelf.eye_level ? 'Yes' : 'No'}</span>
+            </h2>
             <div className="flex flex-col md:flex-row gap-6">
                 <div className="flex flex-row items-end gap-3 px-5 border-b">
                     {shelf.InventoryPlacement && shelf.InventoryPlacement.length > 0 ? (
@@ -94,21 +97,11 @@ const Merchandise = ({ merchandise }: { merchandise: Inventory }) => {
         return <div>Invalid merchandise data</div>
     }
 
-    useEffect(() => {
-        if (divRef.current) {
-            divRef.current.style.width = `${merchandise.width / 10}rem`;
-            divRef.current.style.height = `${merchandise.height / 10}rem`;
-        }
-    }, [merchandise])
-
     return (
         <div className={clsx("border p-2 rounded bg-white shadow mb-1",
             merchandise.isPromoted ? 'border-red-500' : 'border-gray-300',
-            // `${`w-[${merchandise.width}rem]`} h-[${merchandise.height}rem]`,
-            // 'w-40', // set a fixed size for demo purpose
-            // "w-[5.51rem]"
-            // )} style={{ width: `${merchandise.width / 10}rem`, height: `${merchandise.height / 10}rem` }}>
-        )} style={{ width: `${merchandise.width * 10}px`, height: `${merchandise.height * 50}px` }}>
+            // add minimum width
+        )} style={{ width: `${merchandise.width * 10 < 100 ? 100 : merchandise.width * 10}px`, height: `${(merchandise.height * 50 < 100 ? merchandise.height * 50 : 100)}px` }}>
             {/* // )} ref={divRef}> */}
             {/* set width according to merchandise.width */}
             <h3 className="font-semibold text-center">{merchandise.name}</h3>
@@ -118,18 +111,10 @@ const Merchandise = ({ merchandise }: { merchandise: Inventory }) => {
 
 const MerchandiseDetail = ({ merchandise }: { merchandise: Inventory }) => {
     // return the size the merchandise occupies on the shelf
-    const divRef = useRef<HTMLDivElement | null>(null);
 
     if (!merchandise) {
         return <div>Invalid merchandise data</div>
     }
-
-    useEffect(() => {
-        if (divRef.current) {
-            divRef.current.style.width = `${merchandise.width / 10}rem`;
-            divRef.current.style.height = `${merchandise.height / 10}rem`;
-        }
-    }, [merchandise])
 
     return (
         <div className={clsx("text-center",
@@ -137,12 +122,14 @@ const MerchandiseDetail = ({ merchandise }: { merchandise: Inventory }) => {
             // 'w-40', // set a fixed size for demo purpose
             // "w-[5.51rem]"
             // )} style={{ width: `${merchandise.width / 10}rem`, height: `${merchandise.height / 10}rem` }}>
-        )} style={{ width: `${merchandise.width * 10}px`}}>
+        )} style={{ width: `${merchandise.width * 10 < 100 ? 100 : merchandise.width * 10}px` }}>
             {/* // )} ref={divRef}> */}
             {/* set width according to merchandise.width */}
             {/* <h3 className="font-semibold">{merchandise.name}</h3> */}
             <p className='text-sm'>W:{merchandise.width}</p>
             <p className='text-sm'>H:{merchandise.height}</p>
+            <p className='text-sm'>W:{merchandise.weight}</p>
+
             {/* <p>Depth: {merchandise.depth} cm</p>
             <p>Weight: {merchandise.weight} g</p>
             <p>Price: ${merchandise.price}</p>
