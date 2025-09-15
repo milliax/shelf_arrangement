@@ -1,8 +1,6 @@
 from gurobipy import Model, GRB
 from database import init_database, get_db_manager
 from models import Inventory
-import gurobipy as gp
-
 
 class GurobiSolver:
     def __init__(self, db_manager):

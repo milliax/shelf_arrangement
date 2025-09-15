@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 import uuid
 from database import init_database, get_db_manager
-from ortools_basic_solver import ORToolsBasicSolver
+from ortools_cpsat_solver import ORToolsCPSATSolver
 from shelf_configuration import ShelfConfiguration
 from dotenv import load_dotenv
 
@@ -85,8 +85,8 @@ def main():
 
     print(f"Number one fetched item: {products_df.iloc[0].to_dict()}")
 
-    # Initialize optimizer with OR-Tools SCIP solver
-    optimizer = ORToolsBasicSolver(db_manager)
+    # Initialize optimizer with high-performance OR-Tools CP-SAT (multi-core)
+    optimizer = ORToolsCPSATSolver(db_manager)
     optimizer.setup_model(products_df, shelves)
 
     # Optimize the arrangement
