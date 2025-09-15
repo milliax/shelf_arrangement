@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 // import ShelfCard from '@/components/ShelfCard'
 import { ShelfWithPlacements } from '@/types'
 import { Inventory } from '../../generated/prisma'
@@ -9,6 +9,8 @@ import clsx from 'clsx'
 export default function Home() {
     const [shelves, setShelves] = useState<ShelfWithPlacements[]>([])
     const [loading, setLoading] = useState(true)
+
+    const [merchandiseNotSelected, setMerchandiseNotSelected] = useState<Inventory[]>([])
 
     const fetchShelves = async () => {
         setLoading(true)
@@ -28,8 +30,19 @@ export default function Home() {
         }
     }
 
+    const fetchMerchandiseNotPicked = async () => {
+        const response = await fetch("/api/merchandiseNotPicked")
+        if (!response.ok) {
+            throw new Error('Failed to fetch merchandise not picked')
+        }
+        const data = await response.json()
+        console.log(data)
+        setMerchandiseNotSelected(data)
+    }
+
     useEffect(() => {
         fetchShelves()
+        fetchMerchandiseNotPicked()
     }, [])
 
     return (
@@ -47,6 +60,27 @@ export default function Home() {
                     )}
                 </div>
             )}
+
+            <div className="mt-12">
+                <h2 className="text-2xl font-bold mb-4">Merchandise Not Selected</h2>
+                {merchandiseNotSelected.length > 0 ? (
+                    <div className='flex flex-col overflow-x-auto'>
+                        <div className="flex flex-row gap-4">
+                            {merchandiseNotSelected.map((item) => (
+                                <Merchandise key={item.id} merchandise={item} />
+                            ))}
+                        </div>
+
+                        <div className="flex flex-row gap-4">
+                            {merchandiseNotSelected.map((item) => (
+                                <MerchandiseDetail key={item.id} merchandise={item} />
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <p className="text-gray-500">All merchandise has been placed on shelves.</p>
+                )}
+            </div>
         </div>
     )
 }
@@ -129,6 +163,7 @@ const MerchandiseDetail = ({ merchandise }: { merchandise: Inventory }) => {
             <p className='text-sm'>W:{merchandise.width}</p>
             <p className='text-sm'>H:{merchandise.height}</p>
             <p className='text-sm'>W:{merchandise.weight}</p>
+            <p className='text-sm'>P*S:{Math.round(merchandise.price * (merchandise?.salesRate ?? 0))}</p>
 
             {/* <p>Depth: {merchandise.depth} cm</p>
             <p>Weight: {merchandise.weight} g</p>

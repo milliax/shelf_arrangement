@@ -53,6 +53,12 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   handler satisfies AppPageConfig<"/">
 }
 
+// Validate ../../src/app/api/merchandiseNotPicked/route.ts
+{
+  const handler = {} as typeof import("../../src/app/api/merchandiseNotPicked/route.js")
+  handler satisfies RouteHandlerConfig<"/api/merchandiseNotPicked">
+}
+
 // Validate ../../src/app/api/optimization-runs/route.ts
 {
   const handler = {} as typeof import("../../src/app/api/optimization-runs/route.js")
