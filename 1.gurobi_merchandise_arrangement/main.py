@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 import uuid
 from database import init_database, get_db_manager
-from gurobi_solver import GurobiSolver
+from ortools_basic_solver import ORToolsBasicSolver
 from shelf_configuration import ShelfConfiguration
 from dotenv import load_dotenv
 
@@ -85,8 +85,8 @@ def main():
 
     print(f"Number one fetched item: {products_df.iloc[0].to_dict()}")
 
-    # Initialize optimizer with gurobi
-    optimizer = GurobiSolver(db_manager)
+    # Initialize optimizer with OR-Tools SCIP solver
+    optimizer = ORToolsBasicSolver(db_manager)
     optimizer.setup_model(products_df, shelves)
 
     # Optimize the arrangement
@@ -123,7 +123,7 @@ def main():
 
         # pylint: disable=some-error-code
         db_manager.save_optimization_results(solution, run_id=str(  # type: ignore
-            uuid.uuid4()), total_objective=optimizer.model.ObjVal)
+            uuid.uuid4()), total_objective=optimizer.objective_value)
 
     else:
         print("No optimal solution found.")
