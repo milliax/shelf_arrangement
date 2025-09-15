@@ -10,6 +10,17 @@ class GurobiSolver:
         self.model = Model("Merchandise Arrangement")
         self.model.setParam('OutputFlag', 0)
 
+        self.model.setParam('PoolSearchMode', 2)  # 1 = find multiple solutions
+        self.model.setParam('PoolSolutions', 100)  # Maximum number of solutions to keep
+        self.model.setParam('Method', 1)  # Use dual simplex
+
+        self.model.setParam('Threads', 16)  # Use 16 threads (adjust based on your CPU)
+
+        self.model.setParam('MIPGap', 0.01)  # Accept solution within 1% of optimal
+        self.model.setParam('OptimalityTol', 1e-6)  # For numerical precision
+
+        self.model.setParam('LogToConsole', 1)  # Show progress
+
     def setup_model(self, merchandise, shelves):
         # Define variables, constraints, and objective function here
         # Example: self.model.addVar(name="x", vtype=GRB.BINARY)
@@ -105,11 +116,16 @@ class GurobiSolver:
 
         """ Objective functions """
 
-        # maximize the number of displayed items
         self.model.setObjective(
+            # maximize the number of displayed items
             sum(self.y[i] for i in range(num_items))
+            #
             + sum(10000 for i in range(num_items)
-                  for j in range(num_shelves) if shelves[j].eye_level and self.merchandise.iloc[i]['isPromoted']), GRB.MAXIMIZE)
+                  for j in range(num_shelves) if shelves[j].eye_level and self.merchandise.iloc[i]['isPromoted'])
+            # take salesRate into consideration
+            + sum(self.merchandise.iloc[i]["price"] * self.merchandise.iloc[i]["salesRate"] for i in range(num_items)
+                if self.y[i])
+            , GRB.MAXIMIZE)
         pass
 
     def optimize(self):

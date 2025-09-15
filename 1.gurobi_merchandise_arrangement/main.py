@@ -17,7 +17,7 @@ def main():
 
     # Generate shelf dimensions
     shelf_dimensions = {
-        'width': 500,  # Example width in cm
+        'width': 100,  # Example width in cm
         'height': 50,  # Example height in cm
         'depth': 50,  # Example length in cm
         'weight': 10000,  # Example max weight in g

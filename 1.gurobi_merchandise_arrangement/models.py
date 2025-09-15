@@ -24,6 +24,7 @@ class Inventory(Base):
                         default=datetime.utcnow, onupdate=datetime.utcnow)
 
     isPromoted = Column(Boolean, nullable=True, default=False)
+    salesRate = Column(Float, nullable=True, default=0.0)
 
     # Relationship
     placements = relationship('InventoryPlacement', back_populates='inventory')

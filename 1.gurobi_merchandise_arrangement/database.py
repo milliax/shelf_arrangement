@@ -49,33 +49,35 @@ class DatabaseManager:
         """Get a database session"""
         return self.SessionLocal()
 
-    def get_inventory_df(self) -> pd.DataFrame:
-        """
-        Get all inventory items as pandas DataFrame for optimization
-        """
-        with self.get_session() as session:
-            from models import Inventory
+    # def get_inventory_df(self) -> pd.DataFrame:
+    #     """
+    #     Get all inventory items as pandas DataFrame for optimization
+    #     """
+    #     with self.get_session() as session:
+    #         from models import Inventory
 
-            inventory_items = session.query(Inventory).all()
+    #         inventory_items = session.query(Inventory).all()
 
-            if not inventory_items:
-                return pd.DataFrame()
+    #         if not inventory_items:
+    #             return pd.DataFrame()
 
-            data = []
-            for item in inventory_items:
-                data.append({
-                    # Use id as product_id since that's what we had before
-                    'product_id': str(item.id),
-                    'name': item.name,
-                    'category': item.description,  # Use description as category for now
-                    'width': item.width,
-                    'depth': item.depth,
-                    'height': item.height,
-                    'margin': 0.25,  # Default margin since not in schema
-                    'sales_frequency': 0.5  # Default sales frequency since not in schema
-                })
+    #         data = []
+    #         for item in inventory_items:
+    #             data.append({
+    #                 # Use id as product_id since that's what we had before
+    #                 'product_id': str(item.id),
+    #                 'name': item.name,
+    #                 'category': item.description,  # Use description as category for now
+    #                 'width': item.width,
+    #                 'depth': item.depth,
+    #                 'height': item.height,
+    #                 'weight': item.weight,
+    #                 'price': item.price,
+    #                 'quantity': item.quantity,
+    #                 "salesRate": item.salesRate   # Default sales frequency since not in schema
+    #             })
 
-            return pd.DataFrame(data)
+    #         return pd.DataFrame(data)
 
     def get_inventories_with_constraints(self, dimension: Dict[str, float]) -> pd.DataFrame:
         """
@@ -120,6 +122,7 @@ class DatabaseManager:
                     'price': item.price,
                     'quantity': item.quantity,
 
+                    'salesRate': item.salesRate if hasattr(item, 'salesRate') else 0.0,
                     'isPromoted': item.isPromoted if hasattr(item, 'isPromoted') else False,
                 })
 
