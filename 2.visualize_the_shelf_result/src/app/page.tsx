@@ -21,6 +21,10 @@ export default function Home() {
             }
             const data = await response.json()
             console.log(data)
+
+            // sort the shelves by order
+            data.sort((a: any, b: any) => a.order - b.order)
+
             setShelves(data)
         } catch (err: any) {
             console.error('Error fetching shelves:', err)

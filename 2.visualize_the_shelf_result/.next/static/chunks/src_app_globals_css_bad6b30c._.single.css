@@ -573,10 +573,6 @@
     height: calc(var(--spacing) * 3);
   }
 
-  .h-40 {
-    height: calc(var(--spacing) * 40);
-  }
-
   .h-64 {
     height: calc(var(--spacing) * 64);
   }
@@ -619,10 +615,6 @@
 
   .flex-row {
     flex-direction: row;
-  }
-
-  .flex-wrap {
-    flex-wrap: wrap;
   }
 
   .items-center {

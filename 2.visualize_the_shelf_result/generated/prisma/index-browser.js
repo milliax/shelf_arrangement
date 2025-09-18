@@ -139,7 +139,8 @@ exports.Prisma.InventoryScalarFieldEnum = {
 exports.Prisma.InventoryPlacementScalarFieldEnum = {
   id: 'id',
   inventoryId: 'inventoryId',
-  shelfId: 'shelfId'
+  shelfId: 'shelfId',
+  order: 'order'
 };
 
 exports.Prisma.Optimization_runsScalarFieldEnum = {

@@ -2445,29 +2445,34 @@ export namespace Prisma {
   export type InventoryPlacementAvgAggregateOutputType = {
     inventoryId: number | null
     shelfId: number | null
+    order: number | null
   }
 
   export type InventoryPlacementSumAggregateOutputType = {
     inventoryId: number | null
     shelfId: number | null
+    order: number | null
   }
 
   export type InventoryPlacementMinAggregateOutputType = {
     id: string | null
     inventoryId: number | null
     shelfId: number | null
+    order: number | null
   }
 
   export type InventoryPlacementMaxAggregateOutputType = {
     id: string | null
     inventoryId: number | null
     shelfId: number | null
+    order: number | null
   }
 
   export type InventoryPlacementCountAggregateOutputType = {
     id: number
     inventoryId: number
     shelfId: number
+    order: number
     _all: number
   }
 
@@ -2475,29 +2480,34 @@ export namespace Prisma {
   export type InventoryPlacementAvgAggregateInputType = {
     inventoryId?: true
     shelfId?: true
+    order?: true
   }
 
   export type InventoryPlacementSumAggregateInputType = {
     inventoryId?: true
     shelfId?: true
+    order?: true
   }
 
   export type InventoryPlacementMinAggregateInputType = {
     id?: true
     inventoryId?: true
     shelfId?: true
+    order?: true
   }
 
   export type InventoryPlacementMaxAggregateInputType = {
     id?: true
     inventoryId?: true
     shelfId?: true
+    order?: true
   }
 
   export type InventoryPlacementCountAggregateInputType = {
     id?: true
     inventoryId?: true
     shelfId?: true
+    order?: true
     _all?: true
   }
 
@@ -2591,6 +2601,7 @@ export namespace Prisma {
     id: string
     inventoryId: number
     shelfId: number
+    order: number
     _count: InventoryPlacementCountAggregateOutputType | null
     _avg: InventoryPlacementAvgAggregateOutputType | null
     _sum: InventoryPlacementSumAggregateOutputType | null
@@ -2616,6 +2627,7 @@ export namespace Prisma {
     id?: boolean
     inventoryId?: boolean
     shelfId?: boolean
+    order?: boolean
     inventory?: boolean | InventoryDefaultArgs<ExtArgs>
     shelf?: boolean | shelvesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryPlacement"]>
@@ -2624,6 +2636,7 @@ export namespace Prisma {
     id?: boolean
     inventoryId?: boolean
     shelfId?: boolean
+    order?: boolean
     inventory?: boolean | InventoryDefaultArgs<ExtArgs>
     shelf?: boolean | shelvesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryPlacement"]>
@@ -2632,6 +2645,7 @@ export namespace Prisma {
     id?: boolean
     inventoryId?: boolean
     shelfId?: boolean
+    order?: boolean
     inventory?: boolean | InventoryDefaultArgs<ExtArgs>
     shelf?: boolean | shelvesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventoryPlacement"]>
@@ -2640,9 +2654,10 @@ export namespace Prisma {
     id?: boolean
     inventoryId?: boolean
     shelfId?: boolean
+    order?: boolean
   }
 
-  export type InventoryPlacementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "inventoryId" | "shelfId", ExtArgs["result"]["inventoryPlacement"]>
+  export type InventoryPlacementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "inventoryId" | "shelfId" | "order", ExtArgs["result"]["inventoryPlacement"]>
   export type InventoryPlacementInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     inventory?: boolean | InventoryDefaultArgs<ExtArgs>
     shelf?: boolean | shelvesDefaultArgs<ExtArgs>
@@ -2666,6 +2681,7 @@ export namespace Prisma {
       id: string
       inventoryId: number
       shelfId: number
+      order: number
     }, ExtArgs["result"]["inventoryPlacement"]>
     composites: {}
   }
@@ -3094,6 +3110,7 @@ export namespace Prisma {
     readonly id: FieldRef<"InventoryPlacement", 'String'>
     readonly inventoryId: FieldRef<"InventoryPlacement", 'Int'>
     readonly shelfId: FieldRef<"InventoryPlacement", 'Int'>
+    readonly order: FieldRef<"InventoryPlacement", 'Int'>
   }
     
 
@@ -5796,7 +5813,8 @@ export namespace Prisma {
   export const InventoryPlacementScalarFieldEnum: {
     id: 'id',
     inventoryId: 'inventoryId',
-    shelfId: 'shelfId'
+    shelfId: 'shelfId',
+    order: 'order'
   };
 
   export type InventoryPlacementScalarFieldEnum = (typeof InventoryPlacementScalarFieldEnum)[keyof typeof InventoryPlacementScalarFieldEnum]
@@ -6030,6 +6048,7 @@ export namespace Prisma {
     id?: StringFilter<"InventoryPlacement"> | string
     inventoryId?: IntFilter<"InventoryPlacement"> | number
     shelfId?: IntFilter<"InventoryPlacement"> | number
+    order?: IntFilter<"InventoryPlacement"> | number
     inventory?: XOR<InventoryScalarRelationFilter, InventoryWhereInput>
     shelf?: XOR<ShelvesScalarRelationFilter, shelvesWhereInput>
   }
@@ -6038,6 +6057,7 @@ export namespace Prisma {
     id?: SortOrder
     inventoryId?: SortOrder
     shelfId?: SortOrder
+    order?: SortOrder
     inventory?: InventoryOrderByWithRelationInput
     shelf?: shelvesOrderByWithRelationInput
   }
@@ -6049,6 +6069,7 @@ export namespace Prisma {
     NOT?: InventoryPlacementWhereInput | InventoryPlacementWhereInput[]
     inventoryId?: IntFilter<"InventoryPlacement"> | number
     shelfId?: IntFilter<"InventoryPlacement"> | number
+    order?: IntFilter<"InventoryPlacement"> | number
     inventory?: XOR<InventoryScalarRelationFilter, InventoryWhereInput>
     shelf?: XOR<ShelvesScalarRelationFilter, shelvesWhereInput>
   }, "id">
@@ -6057,6 +6078,7 @@ export namespace Prisma {
     id?: SortOrder
     inventoryId?: SortOrder
     shelfId?: SortOrder
+    order?: SortOrder
     _count?: InventoryPlacementCountOrderByAggregateInput
     _avg?: InventoryPlacementAvgOrderByAggregateInput
     _max?: InventoryPlacementMaxOrderByAggregateInput
@@ -6071,6 +6093,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"InventoryPlacement"> | string
     inventoryId?: IntWithAggregatesFilter<"InventoryPlacement"> | number
     shelfId?: IntWithAggregatesFilter<"InventoryPlacement"> | number
+    order?: IntWithAggregatesFilter<"InventoryPlacement"> | number
   }
 
   export type optimization_runsWhereInput = {
@@ -6334,6 +6357,7 @@ export namespace Prisma {
 
   export type InventoryPlacementCreateInput = {
     id?: string
+    order?: number
     inventory: InventoryCreateNestedOneWithoutInventoryPlacementInput
     shelf: shelvesCreateNestedOneWithoutInventoryPlacementInput
   }
@@ -6342,10 +6366,12 @@ export namespace Prisma {
     id?: string
     inventoryId: number
     shelfId: number
+    order?: number
   }
 
   export type InventoryPlacementUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
     inventory?: InventoryUpdateOneRequiredWithoutInventoryPlacementNestedInput
     shelf?: shelvesUpdateOneRequiredWithoutInventoryPlacementNestedInput
   }
@@ -6354,22 +6380,26 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     inventoryId?: IntFieldUpdateOperationsInput | number
     shelfId?: IntFieldUpdateOperationsInput | number
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type InventoryPlacementCreateManyInput = {
     id?: string
     inventoryId: number
     shelfId: number
+    order?: number
   }
 
   export type InventoryPlacementUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type InventoryPlacementUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     inventoryId?: IntFieldUpdateOperationsInput | number
     shelfId?: IntFieldUpdateOperationsInput | number
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type optimization_runsCreateInput = {
@@ -6782,28 +6812,33 @@ export namespace Prisma {
     id?: SortOrder
     inventoryId?: SortOrder
     shelfId?: SortOrder
+    order?: SortOrder
   }
 
   export type InventoryPlacementAvgOrderByAggregateInput = {
     inventoryId?: SortOrder
     shelfId?: SortOrder
+    order?: SortOrder
   }
 
   export type InventoryPlacementMaxOrderByAggregateInput = {
     id?: SortOrder
     inventoryId?: SortOrder
     shelfId?: SortOrder
+    order?: SortOrder
   }
 
   export type InventoryPlacementMinOrderByAggregateInput = {
     id?: SortOrder
     inventoryId?: SortOrder
     shelfId?: SortOrder
+    order?: SortOrder
   }
 
   export type InventoryPlacementSumOrderByAggregateInput = {
     inventoryId?: SortOrder
     shelfId?: SortOrder
+    order?: SortOrder
   }
 
   export type StringNullableFilter<$PrismaModel = never> = {
@@ -7368,12 +7403,14 @@ export namespace Prisma {
 
   export type InventoryPlacementCreateWithoutInventoryInput = {
     id?: string
+    order?: number
     shelf: shelvesCreateNestedOneWithoutInventoryPlacementInput
   }
 
   export type InventoryPlacementUncheckedCreateWithoutInventoryInput = {
     id?: string
     shelfId: number
+    order?: number
   }
 
   export type InventoryPlacementCreateOrConnectWithoutInventoryInput = {
@@ -7409,6 +7446,7 @@ export namespace Prisma {
     id?: StringFilter<"InventoryPlacement"> | string
     inventoryId?: IntFilter<"InventoryPlacement"> | number
     shelfId?: IntFilter<"InventoryPlacement"> | number
+    order?: IntFilter<"InventoryPlacement"> | number
   }
 
   export type InventoryCreateWithoutInventoryPlacementInput = {
@@ -7553,12 +7591,14 @@ export namespace Prisma {
 
   export type InventoryPlacementCreateWithoutShelfInput = {
     id?: string
+    order?: number
     inventory: InventoryCreateNestedOneWithoutInventoryPlacementInput
   }
 
   export type InventoryPlacementUncheckedCreateWithoutShelfInput = {
     id?: string
     inventoryId: number
+    order?: number
   }
 
   export type InventoryPlacementCreateOrConnectWithoutShelfInput = {
@@ -7590,41 +7630,49 @@ export namespace Prisma {
   export type InventoryPlacementCreateManyInventoryInput = {
     id?: string
     shelfId: number
+    order?: number
   }
 
   export type InventoryPlacementUpdateWithoutInventoryInput = {
     id?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
     shelf?: shelvesUpdateOneRequiredWithoutInventoryPlacementNestedInput
   }
 
   export type InventoryPlacementUncheckedUpdateWithoutInventoryInput = {
     id?: StringFieldUpdateOperationsInput | string
     shelfId?: IntFieldUpdateOperationsInput | number
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type InventoryPlacementUncheckedUpdateManyWithoutInventoryInput = {
     id?: StringFieldUpdateOperationsInput | string
     shelfId?: IntFieldUpdateOperationsInput | number
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type InventoryPlacementCreateManyShelfInput = {
     id?: string
     inventoryId: number
+    order?: number
   }
 
   export type InventoryPlacementUpdateWithoutShelfInput = {
     id?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
     inventory?: InventoryUpdateOneRequiredWithoutInventoryPlacementNestedInput
   }
 
   export type InventoryPlacementUncheckedUpdateWithoutShelfInput = {
     id?: StringFieldUpdateOperationsInput | string
     inventoryId?: IntFieldUpdateOperationsInput | number
+    order?: IntFieldUpdateOperationsInput | number
   }
 
   export type InventoryPlacementUncheckedUpdateManyWithoutShelfInput = {
     id?: StringFieldUpdateOperationsInput | string
     inventoryId?: IntFieldUpdateOperationsInput | number
+    order?: IntFieldUpdateOperationsInput | number
   }
 
 

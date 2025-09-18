@@ -36,6 +36,8 @@ model InventoryPlacement {
 
   shelf   shelves @relation(fields: [shelfId], references: [id], onDelete: Cascade)
   shelfId Int
+
+  order Int @default(autoincrement())
 }
 
 model optimization_runs {
