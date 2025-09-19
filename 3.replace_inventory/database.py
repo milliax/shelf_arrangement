@@ -87,13 +87,13 @@ class DatabaseManager:
                 'createdAt': inventory.createdAt.isoformat() if inventory.createdAt else None,
                 'updatedAt': inventory.updatedAt.isoformat() if inventory.updatedAt else None
             }
-    def get_rest_inventories(self, shelf_id: int, inventory_number: int) -> pd.DataFrame:
+
+    def get_rest_inventories(self, exclude_shelf_id: Optional[int] = None) -> pd.DataFrame:
         """
-        Get the rest of the inventories not on the specified shelf
+        Get the rest of the inventories not on any shelf, or not on a specific shelf
 
         Args:
-            shelf_id: Shelf ID
-            inventory_number: Number of inventory items on the shelf
+            exclude_shelf_id: Optional shelf ID to exclude from results
 
         Returns:
             DataFrame of remaining inventory items
@@ -101,17 +101,25 @@ class DatabaseManager:
         from models import Inventory, InventoryPlacement, Shelves
 
         with self.get_session() as session:
-            # Subquery to get inventory IDs already placed on the shelf
-            results = session.query(Inventory).filter(
-                ~Inventory.id.in_(
-                    session.query(InventoryPlacement.inventory_id).join(Shelves).filter(
-                        Shelves.shelf_id == shelf_id
-                    )
-                )
-            ).all()
+            query = session.query(Inventory)
+
+            if exclude_shelf_id is not None:
+                # Get inventory IDs already placed on the specified shelf
+                placed_subquery = session.query(InventoryPlacement.inventoryId).join(
+                    Shelves, InventoryPlacement.shelfId == Shelves.id
+                ).filter(Shelves.shelf_id == exclude_shelf_id)
+
+                query = query.filter(~Inventory.id.in_(placed_subquery))
+            else:
+                # Get all inventory not placed on any shelf
+                placed_subquery = session.query(InventoryPlacement.inventoryId)
+                query = query.filter(~Inventory.id.in_(placed_subquery))
+
+            results = query.all()
 
             # Convert results to DataFrame
             inventory_list = [{
+                'product_id': inv.id,  # Use product_id for compatibility with solver
                 'id': inv.id,
                 'name': inv.name,
                 'description': inv.description,
@@ -126,6 +134,111 @@ class DatabaseManager:
             } for inv in results]
 
             return pd.DataFrame(inventory_list)
+
+    def replace_inventory_on_shelf(self, placement_id: str, new_inventory_id: int) -> bool:
+        """
+        Replace an inventory item on a shelf with a new inventory item
+
+        Args:
+            placement_id: ID of the placement to replace
+            new_inventory_id: ID of the new inventory item
+
+        Returns:
+            Boolean indicating success
+        """
+        from models import InventoryPlacement
+
+        print(
+            f"Replacing placement {placement_id} with inventory {new_inventory_id}")
+
+        with self.get_session() as session:
+            try:
+                # Get the existing placement
+                placement = session.query(InventoryPlacement).filter(
+                    InventoryPlacement.id == placement_id
+                ).first()
+
+                if not placement:
+                    print(f"Placement with ID {placement_id} not found")
+                    return False
+
+                # Update the inventory ID
+                placement.inventoryId = new_inventory_id
+
+                # Commit the changes
+                session.commit()
+                print(
+                    f"Successfully replaced inventory in placement {placement_id} with inventory {new_inventory_id}")
+                return True
+
+            except Exception as e:
+                print(f"Error replacing inventory: {e}")
+                session.rollback()
+                return False
+
+    def get_shelf_info(self, shelf_id: int) -> Optional[Dict[str, Any]]:
+        """
+        Get shelf information including dimensions and constraints
+
+        Args:
+            shelf_id: Shelf ID
+
+        Returns:
+            Dictionary containing shelf information or None if not found
+        """
+        from models import Shelves
+
+        with self.get_session() as session:
+            shelf = session.query(Shelves).filter(
+                Shelves.shelf_id == shelf_id).first()
+
+            if not shelf:
+                return None
+
+            return {
+                'id': shelf.id,
+                'shelf_id': shelf.shelf_id,
+                'width': shelf.width,
+                'height': shelf.height,
+                'depth': shelf.depth,
+                'weight': shelf.weight,
+                'eye_level': shelf.eye_level,
+                'gap': 0.25  # Default gap value from models
+            }
+
+    def get_inventories_on_shelf(self, shelf_id):
+        # get inventories on shelf_id
+
+        from models import Shelves, InventoryPlacement, Inventory
+
+        with self.get_session() as session:
+            shelf = session.query(Shelves).filter(
+                Shelves.shelf_id == shelf_id
+            ).join(InventoryPlacement).join(Inventory).all()
+
+            if not shelf:
+                return pd.DataFrame()
+
+            inventory_list = []
+            for sh in shelf:
+                for placement in sh.placements:
+                    inv = placement.inventory
+                    inventory_list.append({
+                        'product_id': inv.id,
+                        'id': inv.id,
+                        'name': inv.name,
+                        'description': inv.description,
+                        'quantity': inv.quantity,
+                        'width': inv.width,
+                        'height': inv.height,
+                        'depth': inv.depth,
+                        'price': inv.price,
+                        'weight': inv.weight,
+                        'isPromoted': inv.isPromoted,
+                        'salesRate': inv.salesRate
+                    })
+            return pd.DataFrame(inventory_list)
+
 
 # Global database manager instance
 db_manager = None

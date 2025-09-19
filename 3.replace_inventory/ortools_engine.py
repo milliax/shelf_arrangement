@@ -2,142 +2,157 @@ from ortools.linear_solver import pywraplp
 from database import init_database, get_db_manager
 from models import Inventory
 
+
 class ORToolsBasicSolver:
     """Basic OR-Tools SCIP solver - direct replacement for Gurobi"""
-    def __init__(self, db_manager):
+
+    def __init__(self, db_manager, time_limit_ms=300000, enable_output=False):
         self.db_manager = db_manager
         self.solver = pywraplp.Solver.CreateSolver('SCIP')
         if not self.solver:
             raise Exception('SCIP solver unavailable')
 
-        # Set basic solver parameters
-        self.solver.set_time_limit(300000)  # 5 minutes timeout
-        self.solver.EnableOutput()  # Enable output
+        # Set solver parameters
+        self.solver.set_time_limit(time_limit_ms)  # Default 5 minutes timeout
+        if enable_output:
+            self.solver.EnableOutput()
 
-    def setup_model(self, merchandise, shelves):
+        # Store model state
+        self.x = {}
+        self.merchandise = None
+        self.shelf = None
+        self.is_solved = False
+
+    def setup_model(self, merchandise, shelf, dimension_constraint, inventories_on_shelf):
         self.merchandise = merchandise
-        self.shelves = shelves
+        self.shelf = shelf
+        self.inventories_on_shelf = inventories_on_shelf
 
         num_items = len(merchandise)
-        num_shelves = len(shelves)
+
+        # calculate the weight remaining after removing the selected inventory
+
+        total_weight_on_shelf = 0
+        for _, item in inventories_on_shelf.iterrows():
+            total_weight_on_shelf += item['weight']
+
+        total_weight_on_shelf -= dimension_constraint['weight']
 
         # Binary variables
-        self.x = {}  # item i on shelf j
-        self.y = {}  # item i is displayed
+        self.x = {}  # item i is displayed
 
         # Create variables
         for i in range(num_items):
-            self.y[i] = self.solver.BoolVar(f'item_{i}_displayed')
+            self.x[i] = self.solver.BoolVar(f'item_{i}_displayed')
 
+        # Each item can be placed on only one shelf
         for i in range(num_items):
-            for j in range(num_shelves):
-                self.x[i, j] = self.solver.BoolVar(f'item_{i}_on_shelf_{j}')
+            self.solver.Add(self.x[i] <= 1)
 
-        # Constraint: one item can only be displayed on one shelf
+        # add constraints that width cannot exceed the original one
+
+        width_constraint = dimension_constraint["width"]
+        weight_constraint = shelf['weight']
+        height_constraint = shelf['height']
+        gap = shelf.get('gap', 0.25)  # Default gap if not specified
+
+        self.solver.Add(
+            sum(self.x[i] * (float(self.merchandise.iloc[i]['width']) + gap) for i in range(num_items))
+            <= width_constraint
+        )
+
+        self.solver.Add(
+            sum(self.x[i] * float(self.merchandise.iloc[i]['weight']) for i in range(num_items))
+            <= (weight_constraint - total_weight_on_shelf)
+        )
+
+        # any one of the inventory cannot exceed the height of the shelf
         for i in range(num_items):
-            constraint = self.solver.Constraint(0, 0, f'item_{i}_displayed_once')
-            constraint.SetCoefficient(self.y[i], -1)
-            for j in range(num_shelves):
-                constraint.SetCoefficient(self.x[i, j], 1)
+            self.solver.Add(
+                self.x[i] * float(self.merchandise.iloc[i]['height']) <= height_constraint
+            )
 
-        # Constraint: shelf weight limits
-        for j in range(num_shelves):
-            constraint = self.solver.Constraint(0, float(shelves[j].weight), f'shelf_{j}_max_weight')
-            for i in range(num_items):
-                weight = float(self.merchandise.iloc[i]['weight'])
-                constraint.SetCoefficient(self.x[i, j], weight)
-
-        # Constraint: shelf width limits (including gaps)
-        for j in range(num_shelves):
-            constraint = self.solver.Constraint(0, float(shelves[j].width), f'shelf_{j}_max_width')
-            for i in range(num_items):
-                width = float(self.merchandise.iloc[i]['width'])
-                gap = float(shelves[j].gap)
-                width_with_gap = width + gap
-                constraint.SetCoefficient(self.x[i, j], width_with_gap)
-
-        # Constraint: shelf height limits (each item must fit)
-        for j in range(num_shelves):
-            for i in range(num_items):
-                item_height = float(self.merchandise.iloc[i]['height'])
-                shelf_height = float(shelves[j].height)
-                if item_height > shelf_height:
-                    # Force this combination to be 0
-                    constraint = self.solver.Constraint(0, 0, f'item_{i}_shelf_{j}_height_limit')
-                    constraint.SetCoefficient(self.x[i, j], 1)
-
-        # Constraint: shelf depth limits
-        for j in range(num_shelves):
-            constraint = self.solver.Constraint(0, float(shelves[j].depth), f'shelf_{j}_max_depth')
-            for i in range(num_items):
-                depth = float(self.merchandise.iloc[i]['depth'])
-                constraint.SetCoefficient(self.x[i, j], depth)
-
-        # Constraint: promoted items must be displayed
-        for i in range(num_items):
-            if self.merchandise.iloc[i]['isPromoted']:
-                constraint = self.solver.Constraint(1, 1, f'promoted_item_{i}_must_display')
-                constraint.SetCoefficient(self.y[i], 1)
-
-        # Objective function: maximize displayed items + eye-level promotions + revenue
+        # Objective: maximize total sales rate of displayed items
         objective = self.solver.Objective()
-
-        # Maximize number of displayed items
         for i in range(num_items):
-            objective.SetCoefficient(self.y[i], 1)
-
-        # Add eye-level promotion bonus
-        for i in range(num_items):
-            if self.merchandise.iloc[i]['isPromoted']:
-                for j in range(num_shelves):
-                    if shelves[j].eye_level:
-                        objective.SetCoefficient(self.x[i, j], 10000)
-
-        # Add revenue consideration
-        for i in range(num_items):
-            price = float(self.merchandise.iloc[i]["price"])
-            sales_rate = float(self.merchandise.iloc[i]["salesRate"])
-            revenue = price * sales_rate
-            objective.SetCoefficient(self.y[i], revenue)
-
+            objective.SetCoefficient(self.x[i], float(self.merchandise.iloc[i]['salesRate']))
         objective.SetMaximization()
 
     def optimize(self):
+        """
+        Solve the optimization problem.
+        Returns True if a solution was found, False otherwise.
+        """
         status = self.solver.Solve()
 
         if status == pywraplp.Solver.OPTIMAL:
             print("Optimal solution found")
+            self.is_solved = True
             return True
         elif status == pywraplp.Solver.FEASIBLE:
             print("Feasible solution found")
+            self.is_solved = True
             return True
+        elif status == pywraplp.Solver.INFEASIBLE:
+            print("Problem is infeasible - no solution exists")
+            self.is_solved = False
+            return False
+        elif status == pywraplp.Solver.UNBOUNDED:
+            print("Problem is unbounded")
+            self.is_solved = False
+            return False
         else:
-            print("No optimal solution found")
+            print("No solution found")
+            self.is_solved = False
             return False
 
     def get_solution(self):
-        if self.solver.Solve() == pywraplp.Solver.OPTIMAL or self.solver.Solve() == pywraplp.Solver.FEASIBLE:
+        """
+        Extract the solution from the last solve.
+        Should only be called after optimize() returns True.
+        """
+        if not self.is_solved:
+            print("No solution available. Call optimize() first.")
+            return None
+
+        try:
             solution = {}
 
-            for j in range(len(self.shelves)):
-                solution[j] = []
-                for i in range(len(self.merchandise)):
-                    if self.x[i, j].solution_value() > 0.5:
-                        solution[j].append({
-                            'product_id': self.merchandise.iloc[i]['product_id'],
-                            'name': self.merchandise.iloc[i]['name'],
-                            'width': self.merchandise.iloc[i]['width'],
-                            'height': self.merchandise.iloc[i]['height'],
-                            'depth': self.merchandise.iloc[i]['depth'],
-                            'weight': self.merchandise.iloc[i]['weight'],
-                            'price': self.merchandise.iloc[i]['price'],
-                            'quantity': self.merchandise.iloc[i]['quantity']
-                        })
+            # For single shelf replacement, we only have one shelf (index 0)
+            solution[0] = []
+            for i in range(len(self.merchandise)):
+                if self.x[i].solution_value() > 0.5:
+                    solution[0].append({
+                        'product_id': self.merchandise.iloc[i]['product_id'],
+                        'name': self.merchandise.iloc[i]['name'],
+                        'width': self.merchandise.iloc[i]['width'],
+                        'height': self.merchandise.iloc[i]['height'],
+                        'depth': self.merchandise.iloc[i]['depth'],
+                        'weight': self.merchandise.iloc[i]['weight'],
+                        'price': self.merchandise.iloc[i]['price'],
+                        'quantity': self.merchandise.iloc[i]['quantity']
+                    })
             return solution
-        else:
+        except Exception as e:
+            print(f"Error extracting solution: {e}")
             return None
+
+    def get_solver_stats(self):
+        """Get solver statistics"""
+        if not self.is_solved:
+            return None
+
+        return {
+            'wall_time': self.solver.wall_time(),
+            'iterations': self.solver.iterations(),
+            'objective_value': self.objective_value,
+            'num_variables': self.solver.NumVariables(),
+            'num_constraints': self.solver.NumConstraints()
+        }
 
     @property
     def objective_value(self):
         """Get the objective value (equivalent to Gurobi's ObjVal)"""
+        if not self.is_solved:
+            return 0.0
         return self.solver.Objective().Value()

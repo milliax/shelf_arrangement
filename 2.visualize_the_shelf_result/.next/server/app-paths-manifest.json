@@ -1,5 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
   "/api/merchandiseNotPicked/route": "app/api/merchandiseNotPicked/route.js",
   "/api/shelves/route": "app/api/shelves/route.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
